@@ -1,0 +1,15 @@
+.board-light {
+  background: linear-gradient(56deg, #a8876f, #b8977f);
+}
+
+.board-dark {
+  background: linear-gradient(56deg, #735226, #836236);
+}
+
+.dark-transparent {
+  background: #00000055;
+}
+
+.red-transparent {
+  background: #aa000055;
+}

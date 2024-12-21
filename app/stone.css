@@ -1,0 +1,17 @@
+.stone-black {
+  background: radial-gradient(circle, rgba(48, 48, 48) 0%, rgba(5, 5, 5) 100%);
+  box-shadow:
+    inset -6px -4px 11px 11px rgba(0, 0, 0, 0.5),
+    inset 9px 6px 16px 8px rgba(255, 255, 255, 0.11);
+}
+
+.stone-white {
+  background: radial-gradient(
+    circle,
+    rgba(232, 232, 232) 0%,
+    rgba(170, 170, 170) 100%
+  );
+  box-shadow:
+    inset -6px -4px 8px 7px rgba(0, 0, 0, 0.2),
+    inset 9px 6px 5px 10px rgba(255, 255, 255, 0.39);
+}
