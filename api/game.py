@@ -8,23 +8,34 @@ class Game:
 
     def initialize_board(self):
         self.board = [
-            [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2],
-            [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2],
-            [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2],
-            [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2],
+            [1, 1, 1, 1, None, None, None, None, None, None, None, None, 2, 2, 2, 2],
+            [1, 1, 1, 1, None, None, None, None, None, None, None, None, 2, 2, 2, 2],
+            [1, 1, 1, 1, None, None, None, None, None, None, None, None, 2, 2, 2, 2],
+            [1, 1, 1, 1, None, None, None, None, None, None, None, None, 2, 2, 2, 2],
         ]
 
     def pretty_print(self):
+        value_to_symbol = {
+            None: ".",
+            1: "X",
+            2: "O",
+        }
+
         grids = [np.array(row).reshape(4, 4) for row in self.board]
         grid_layout = np.array(grids).reshape(2, 2, 4, 4)
 
         print()
         for row in grid_layout:
-            for i in range(4):  # For each line in the 4x4 grid
-                print("    ".join(" ".join(map(str, grid[i])) for grid in row))
-            print()  # Add spacing between grid rows
+            for i in range(4):
+                print(
+                    "    ".join(
+                        " ".join(value_to_symbol.get(cell, ".") for cell in grid[i])
+                        for grid in row
+                    )
+                )
+            print()
 
-    def run_command(command):
+    def run_command(self, command):
         if command == "quit" or command == "q" or command == ":q":
             print("exiting...")
             return False
