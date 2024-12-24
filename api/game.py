@@ -5,6 +5,7 @@ class Game:
     def __init__(self):
         self.board = []
         self.initialize_board()
+        self.playerTurn = "black"
 
     def initialize_board(self):
         self.board = [
@@ -34,6 +35,12 @@ class Game:
                     )
                 )
             print()
+
+    def change_turn(self):
+        if self.playerTurn == "black":
+            self.playerTurn = "white"
+        else:
+            self.playerTurn = "black"
 
     def run_command(self, command):
         if command == "quit" or command == "q" or command == ":q":
