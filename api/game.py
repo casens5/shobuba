@@ -44,8 +44,8 @@ class Game:
             self.playerTurn = "black"
 
     def is_passive_move_legal(self, move):
-        if (self.playerTurn == "white" and move.passive[0] < 2) or (
-            self.playerTurn == "black" and move.passive[0] > 1
+        if (self.playerTurn == "white" and move.passive.board < 2) or (
+            self.playerTurn == "black" and move.passive.board > 1
         ):
             print("passive move must be in your home board")
             return False
@@ -72,34 +72,17 @@ class Game:
         }
 
         groups = input_match.groups()
-        groups = [
-            letter_to_index.get(groups[0]),
-            int(groups[1]) - 1,
-            cardinal_to_index.get(groups[2]),
-            int(groups[3]),
-            letter_to_index.get(groups[4]),
-            int(groups[5]) - 1,
-        ]
+        move = {
+                "passive": { "board": letter_to_index.get(groups[0]), "cell":int(groups[1]) - 1},
+                "active": { "board": letter_to_index.get(groups[4]), "cell": int(groups[5]) - 1 }  ,
+                "direction": { "cardinal": cardinal_to_index.get(groups[2]), "length": int(groups[3]) }
+                }
 
-        if (
-            groups[1] > 15
-            or groups[5] > 15
-            or groups[1] < 0
-            or groups[5] < 0
-            or groups[0] == groups[4]
-            or (groups[0] == 0 and groups[4] == 3)
-            or (groups[0] == 1 and groups[4] == 2)
-            or (groups[0] == 2 and groups[4] == 1)
-            or (groups[0] == 3 and groups[4] == 0)
-        ):
+        if move.active.cell > 15 or move.passive.cell > 15 or move.active.cell < 0 or move.passive.cell < 0 or True or True:
             print("invalid coordinates")
             return None
 
-        return {
-            "passive": [letter_to_index.get(groups[0]), groups[1]],
-            "active": [letter_to_index.get(groups[4]), groups[5]],
-            "direction": [cardinal_to_index.get(groups[2]), groups[3]],
-        }
+        return move
 
     def run_command(self, command):
         move_pattern = r"""
@@ -128,7 +111,7 @@ class Game:
         elif command == "restart":
             self.initialize_board()
             return True
-        # legal move
+        # move syntax match
         elif match:
             move = self.parse_move(match)
             print(move)
