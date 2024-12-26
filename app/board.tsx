@@ -378,6 +378,7 @@ const Board = forwardRef((props: BoardProps, ref) => {
         return false;
       }
       // can't push 2 stones in a row
+      // just realized something insane, if the length is 2 and it's a push, you should just be able to count the 3 spaces, and if there are >= 2 stones, it's illegal.  push must be only one stone.
       if (
         (board[betweenCoords[0]][betweenCoords[1]] &&
           board[newCoords[0]][newCoords[1]]) ||

@@ -9,6 +9,8 @@ class BoardMove:
     board: int
     origin: int
     destination: int = None
+    is_push: bool = None
+    push_destination: int = None
 
 
 @dataclass
@@ -83,6 +85,20 @@ class Game:
             return False
 
         return True
+
+    def is_push(self, move):
+        move_diff = (
+            move.active.destination - move.active.origin
+        ) / move.direction.length
+        if self.board[move.active.board][move.active.origin + move_diff]:
+            return True
+        if (
+            move.direction.length == 2
+            and self.board[move.active.board][move.active.origin + (move_diff * 2)]
+        ):
+            return True
+
+        return False
 
     def get_move_destination(self, origin, direction, length):
         x = origin % 4
@@ -193,8 +209,16 @@ class Game:
                 return True
             print(move)
 
+            if self.is_move_push(move):
+                move.active.is_push = True
+                move.active.push_destination = self.get_move_destination(
+                    move.active.origin,
+                    move.direction.cardinal,
+                    move.direction.length + 1,
+                )
+
             if not self.is_move_legal(move):
-                return False
+                return True
 
             return True
         else:
