@@ -94,11 +94,11 @@ class Game:
         move = {
             "passive": {
                 "board": letter_to_index.get(groups[0]),
-                "cell": int(groups[1]) - 1,
+                "origin": int(groups[1]) - 1,
             },
             "active": {
                 "board": letter_to_index.get(groups[4]),
-                "cell": int(groups[5]) - 1,
+                "origin": int(groups[5]) - 1,
             },
             "direction": {
                 "cardinal": cardinal_to_index.get(groups[2]),
@@ -107,10 +107,10 @@ class Game:
         }
 
         if (
-            move.active.cell > 15
-            or move.passive.cell > 15
-            or move.active.cell < 0
-            or move.passive.cell < 0
+            move.active.origin > 15
+            or move.passive.origin > 15
+            or move.active.origin < 0
+            or move.passive.origin < 0
         ):
             print("invalid coordinates")
             return None
