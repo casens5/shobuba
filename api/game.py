@@ -1,4 +1,5 @@
 import numpy as np
+import re
 
 
 class Game:
@@ -42,6 +43,65 @@ class Game:
         else:
             self.playerTurn = "black"
 
+    def parse_move(self, input_text):
+        pattern = r"""
+            ^                         
+            ([a-d])               
+            (\d{1,2})               
+            (n|nw|w|sw|s|se|e|ne)     
+            ([1-2])
+            [,\s]+               
+            ([a-d])          
+            (\d{1,2})          
+            .*                
+            $                         
+        """
+
+        letter_to_index = {
+            "a": 0,
+            "b": 1,
+            "c": 2,
+            "d": 3,
+        }
+
+        cardinal_to_index = {
+            "n": 0,
+            "ne": 1,
+            "e": 2,
+            "se": 3,
+            "s": 4,
+            "sw": 5,
+            "w": 6,
+            "nw": 7,
+        }
+
+        regex = re.compile(pattern, re.VERBOSE | re.IGNORECASE)
+
+        match = regex.match(input_text)
+        if not match:
+            print("invalid input")
+            return None
+
+        groups = match.groups()
+        groups = [
+            letter_to_index.get(groups[0]),
+            int(groups[1]) - 1,
+            cardinal_to_index.get(groups[2]),
+            int(groups[3]),
+            letter_to_index.get(groups[4]),
+            int(groups[5]) - 1,
+        ]
+
+        if groups[1] > 15 or groups[5] > 15 or groups[1] < 0 or groups[5] < 0:
+            print("invalid coordinates")
+            return None
+
+        return {
+            "passive": [letter_to_index.get(groups[0]), groups[1]],
+            "active": [letter_to_index.get(groups[4]), groups[5]],
+            "direction": [cardinal_to_index.get(groups[2]), groups[3]],
+        }
+
     def run_command(self, command):
         if command == "quit" or command == "q" or command == ":q":
             print("exiting...")
@@ -51,6 +111,9 @@ class Game:
             return True
         elif command == "restart":
             self.initialize_board()
+            return True
+        else:
+            print(self.parse_move(command))
             return True
 
 
