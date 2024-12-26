@@ -44,10 +44,23 @@ class Game:
             self.playerTurn = "black"
 
     def is_move_legal(self, move):
-        if not self.is_passive_move_legal(move):
+        if self.is_boards_legal(move) and self.is_passive_move_legal(move):
+            return True
+        else:
             return False
 
-        return True
+    def is_boards_legal(self, move):
+        if (
+            move.passive.board == move.active.board
+            or (move.passive.board == 0 and move.active.board == 3)
+            or (move.passive.board == 1 and move.active.board == 2)
+            or (move.passive.board == 2 and move.active.board == 1)
+            or (move.passive.board == 3 and move.active.board == 0)
+        ):
+            print("active and passive moves can't be on the same color")
+            return False
+        else:
+            return True
 
     def is_passive_move_legal(self, move):
         if (self.playerTurn == "white" and move.passive.board < 2) or (
@@ -79,12 +92,26 @@ class Game:
 
         groups = input_match.groups()
         move = {
-                "passive": { "board": letter_to_index.get(groups[0]), "cell":int(groups[1]) - 1},
-                "active": { "board": letter_to_index.get(groups[4]), "cell": int(groups[5]) - 1 }  ,
-                "direction": { "cardinal": cardinal_to_index.get(groups[2]), "length": int(groups[3]) }
-                }
+            "passive": {
+                "board": letter_to_index.get(groups[0]),
+                "cell": int(groups[1]) - 1,
+            },
+            "active": {
+                "board": letter_to_index.get(groups[4]),
+                "cell": int(groups[5]) - 1,
+            },
+            "direction": {
+                "cardinal": cardinal_to_index.get(groups[2]),
+                "length": int(groups[3]),
+            },
+        }
 
-        if move.active.cell > 15 or move.passive.cell > 15 or move.active.cell < 0 or move.passive.cell < 0 or True or True:
+        if (
+            move.active.cell > 15
+            or move.passive.cell > 15
+            or move.active.cell < 0
+            or move.passive.cell < 0
+        ):
             print("invalid coordinates")
             return None
 
