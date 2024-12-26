@@ -43,6 +43,15 @@ class Game:
         else:
             self.playerTurn = "black"
 
+    def is_passive_move_legal(self, move):
+        if (self.playerTurn == "white" and move.passive[0] < 2) or (
+            self.playerTurn == "black" and move.passive[0] > 1
+        ):
+            print("passive move must be in your home board")
+            return False
+        else:
+            return True
+
     def parse_move(self, input_match):
         letter_to_index = {
             "a": 0,
@@ -119,8 +128,14 @@ class Game:
         elif command == "restart":
             self.initialize_board()
             return True
+        # legal move
         elif match:
-            print(self.parse_move(match))
+            move = self.parse_move(match)
+            print(move)
+
+            if not is_passive_move_legal(move):
+                return False
+
             return True
         else:
             print("invalid input")
