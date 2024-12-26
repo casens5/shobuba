@@ -43,6 +43,12 @@ class Game:
         else:
             self.playerTurn = "black"
 
+    def is_move_legal(self, move):
+        if not self.is_passive_move_legal(move):
+            return False
+
+        return True
+
     def is_passive_move_legal(self, move):
         if (self.playerTurn == "white" and move.passive.board < 2) or (
             self.playerTurn == "black" and move.passive.board > 1
@@ -116,7 +122,7 @@ class Game:
             move = self.parse_move(match)
             print(move)
 
-            if not is_passive_move_legal(move):
+            if not self.is_move_legal(move):
                 return False
 
             return True
