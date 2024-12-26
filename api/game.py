@@ -70,12 +70,6 @@ class Game:
             print("move is out of bounds")
             return False
 
-        if self.is_boards_legal(move) and self.is_passive_move_legal(move):
-            return True
-        else:
-            return False
-
-    def is_boards_legal(self, move):
         if (
             move.passive.board == move.active.board
             or (move.passive.board == 0 and move.active.board == 3)
@@ -85,17 +79,14 @@ class Game:
         ):
             print("active and passive moves can't be on the same color")
             return False
-        else:
-            return True
 
-    def is_passive_move_legal(self, move):
         if (self.playerTurn == "white" and move.passive.board < 2) or (
             self.playerTurn == "black" and move.passive.board > 1
         ):
             print("passive move must be in your home board")
             return False
-        else:
-            return True
+
+        return True
 
     def get_move_destination(self, origin, direction, length):
         x = origin % 4
