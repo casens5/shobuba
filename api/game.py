@@ -72,7 +72,17 @@ class Game:
             int(groups[5]) - 1,
         ]
 
-        if groups[1] > 15 or groups[5] > 15 or groups[1] < 0 or groups[5] < 0:
+        if (
+            groups[1] > 15
+            or groups[5] > 15
+            or groups[1] < 0
+            or groups[5] < 0
+            or groups[0] == groups[4]
+            or (groups[0] == 0 and groups[4] == 3)
+            or (groups[0] == 1 and groups[4] == 2)
+            or (groups[0] == 2 and groups[4] == 1)
+            or (groups[0] == 3 and groups[4] == 0)
+        ):
             print("invalid coordinates")
             return None
 
