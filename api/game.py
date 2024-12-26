@@ -71,6 +71,24 @@ class Game:
         else:
             return True
 
+    def get_move_destination(self, origin, direction, length):
+        x = origin % 4
+        y = origin // 4
+
+        if direction == 7 or direction < 2:
+            y -= length
+        if direction > 2 and direction < 6:
+            y += length
+        if direction > 4:
+            x -= length
+        if direction > 0 and direction < 4:
+            x += length
+
+        if x < 0 or y < 0 or x > 3 or y > 3:
+            return None
+        else:
+            return (y * 4) + x
+
     def parse_move(self, input_match):
         letter_to_index = {
             "a": 0,
@@ -113,6 +131,16 @@ class Game:
             or move.passive.origin < 0
         ):
             print("invalid coordinates")
+            return None
+
+        move.passive.destination = self.get_move_destination(
+            move.passive.origin, move.direction.cardinal, move.direction.length
+        )
+        move.active.destination = self.get_move_destination(
+            move.active.origin, move.direction.cardinal, move.direction.length
+        )
+        if not move.passive.destination or not move.active.destination:
+            print("move is out of bounds")
             return None
 
         return move
