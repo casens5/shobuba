@@ -1,6 +1,28 @@
 import numpy as np
 import re
 
+from dataclasses import dataclass
+
+
+@dataclass
+class BoardMove:
+    board: int
+    origin: int
+    destination: int = None
+
+
+@dataclass
+class Direction:
+    cardinal: int
+    length: int
+
+
+@dataclass
+class Move:
+    passive: BoardMove
+    active: BoardMove
+    direction: Direction
+
 
 class Game:
     def __init__(self):
@@ -109,20 +131,20 @@ class Game:
         }
 
         groups = input_match.groups()
-        move = {
-            "passive": {
-                "board": letter_to_index.get(groups[0]),
-                "origin": int(groups[1]) - 1,
-            },
-            "active": {
-                "board": letter_to_index.get(groups[4]),
-                "origin": int(groups[5]) - 1,
-            },
-            "direction": {
-                "cardinal": cardinal_to_index.get(groups[2]),
-                "length": int(groups[3]),
-            },
-        }
+        move = Move(
+            passive=BoardMove(
+                board=letter_to_index.get(groups[0]),
+                origin=int(groups[1]) - 1,
+            ),
+            active=BoardMove(
+                board=letter_to_index.get(groups[4]),
+                origin=int(groups[5]) - 1,
+            ),
+            direction=Direction(
+                cardinal=cardinal_to_index.get(groups[2]),
+                length=int(groups[3]),
+            ),
+        )
 
         if (
             move.active.origin > 15
