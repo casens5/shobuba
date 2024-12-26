@@ -66,6 +66,10 @@ class Game:
             self.playerTurn = "black"
 
     def is_move_legal(self, move):
+        if not move.passive.destination or not move.active.destination:
+            print("move is out of bounds")
+            return False
+
         if self.is_boards_legal(move) and self.is_passive_move_legal(move):
             return True
         else:
@@ -161,9 +165,6 @@ class Game:
         move.active.destination = self.get_move_destination(
             move.active.origin, move.direction.cardinal, move.direction.length
         )
-        if not move.passive.destination or not move.active.destination:
-            print("move is out of bounds")
-            return None
 
         return move
 
@@ -197,6 +198,8 @@ class Game:
         # move syntax match
         elif match:
             move = self.parse_move(match)
+            if not move:
+                return True
             print(move)
 
             if not self.is_move_legal(move):
