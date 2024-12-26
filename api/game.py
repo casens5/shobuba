@@ -43,20 +43,7 @@ class Game:
         else:
             self.playerTurn = "black"
 
-    def parse_move(self, input_text):
-        pattern = r"""
-            ^                         
-            ([a-d])               
-            (\d{1,2})               
-            (n|nw|w|sw|s|se|e|ne)     
-            ([1-2])
-            [,\s]+               
-            ([a-d])          
-            (\d{1,2})          
-            .*                
-            $                         
-        """
-
+    def parse_move(self, input_match):
         letter_to_index = {
             "a": 0,
             "b": 1,
@@ -75,14 +62,7 @@ class Game:
             "nw": 7,
         }
 
-        regex = re.compile(pattern, re.VERBOSE | re.IGNORECASE)
-
-        match = regex.match(input_text)
-        if not match:
-            print("invalid input")
-            return None
-
-        groups = match.groups()
+        groups = input_match.groups()
         groups = [
             letter_to_index.get(groups[0]),
             int(groups[1]) - 1,
@@ -103,6 +83,23 @@ class Game:
         }
 
     def run_command(self, command):
+        move_pattern = r"""
+            ^                         
+            ([a-d])               
+            (\d{1,2})               
+            (n|nw|w|sw|s|se|e|ne)     
+            ([1-2])
+            [,\s]+               
+            ([a-d])          
+            (\d{1,2})          
+            .*                
+            $                         
+        """
+
+        move_regex = re.compile(move_pattern, re.VERBOSE | re.IGNORECASE)
+
+        match = move_regex.match(command)
+
         if command == "quit" or command == "q" or command == ":q":
             print("exiting...")
             return False
@@ -112,8 +109,11 @@ class Game:
         elif command == "restart":
             self.initialize_board()
             return True
+        elif match:
+            print(self.parse_move(match))
+            return True
         else:
-            print(self.parse_move(command))
+            print("invalid input")
             return True
 
 
