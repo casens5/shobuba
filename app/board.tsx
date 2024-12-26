@@ -367,25 +367,20 @@ const Board = forwardRef((props: BoardProps, ref) => {
     } else if (length === 2 && betweenCoords) {
       // can't push your own stone(s)
       if (
-        (board[newCoords[0]][newCoords[1]] ||
-          board[betweenCoords[0]][betweenCoords[1]]) &&
-        ((board[newCoords[0]][newCoords[1]] &&
+        (board[newCoords[0]][newCoords[1]] &&
           board[newCoords[0]][newCoords[1]]!.color === playerTurn) ||
           (board[betweenCoords[0]][betweenCoords[1]] &&
-            board[betweenCoords[0]][betweenCoords[1]]!.color === playerTurn))
+            board[betweenCoords[0]][betweenCoords[1]]!.color === playerTurn)
       ) {
         onMessage(BoardMessage.MOVESAMECOLORBLOCKING);
         return false;
       }
       // can't push 2 stones in a row
-      // just realized something insane, if the length is 2 and it's a push, you should just be able to count the 3 spaces, and if there are >= 2 stones, it's illegal.  push must be only one stone.
       if (
-        (board[betweenCoords[0]][betweenCoords[1]] &&
-          board[newCoords[0]][newCoords[1]]) ||
-        ((board[betweenCoords[0]][betweenCoords[1]] ||
-          board[newCoords[0]][newCoords[1]]) &&
-          nextCoords &&
-          board[nextCoords[0]][nextCoords[1]])
+        Number(board[betweenCoords[0]][betweenCoords[1]] != null) +
+          Number(board[newCoords[0]][newCoords[1]] != null) +
+          Number(nextCoords && board[nextCoords[0]][nextCoords[1]] != null) >
+        1
       ) {
         onMessage(BoardMessage.MOVETWOSTONESBLOCKING);
         return false;
