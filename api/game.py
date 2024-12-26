@@ -84,6 +84,24 @@ class Game:
             print("passive move must be in your home board")
             return False
 
+        if move.active.is_push:
+            stones = bool(self.board[move.active.board][move.active.destination])
+
+            if move.direction.length == 2:
+                midpoint = move.active.origin + (
+                    move.active.origin - move.active.destination
+                )
+                stones += bool(self.board[move.active.board][midpoint])
+
+            if move.active.push_destination:
+                stones += bool(
+                    self.board[move.active.board][move.active.push_destination]
+                )
+
+            if stones > 1:
+                print("you can't push 2 stones in a row")
+                return False
+
         return True
 
     def is_push(self, move):
@@ -190,7 +208,6 @@ class Game:
         """
 
         move_regex = re.compile(move_pattern, re.VERBOSE | re.IGNORECASE)
-
         match = move_regex.match(command)
 
         if command == "quit" or command == "q" or command == ":q":
