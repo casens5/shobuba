@@ -48,8 +48,10 @@ class Game:
             return False
         elif command == "read":
             self.pretty_print()
+            return True
         elif command == "restart":
             self.initialize_board()
+            return True
 
 
 game = Game()
