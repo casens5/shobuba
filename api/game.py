@@ -41,7 +41,7 @@ class Game:
         ]
 
     def update_board(self, move):
-        player = self.board[move.passive.board][move.passive.origin]
+        player = 1 if self.player_turn == "black" else 2
         self.board[move.passive.board][move.passive.origin] = None
         self.board[move.passive.board][move.passive.destination] = player
         self.board[move.active.board][move.active.origin] = None
@@ -52,8 +52,10 @@ class Game:
             if move.active.push_destination:
                 self.board[move.active.board][move.active.push_destination] = opponent
             if move.direction.length == 2:
-                between = move.active.destination - move.active.origin
-                self.board[move.active.board][between] = None
+                midpoint = move.active.origin + (
+                    move.active.destination - move.active.origin
+                )
+                self.board[move.active.board][midpoint] = None
 
     def pretty_print(self):
         value_to_symbol = {
@@ -106,7 +108,7 @@ class Game:
 
             if move.direction.length == 2:
                 midpoint = move.active.origin + (
-                    move.active.origin - move.active.destination
+                    move.active.destination - move.active.origin
                 )
                 stones += bool(self.board[move.active.board][midpoint])
 
@@ -213,7 +215,6 @@ class Game:
     def play_move(self, move):
         if not move:
             return True
-        print(move)
 
         if self.is_move_push(move):
             move.active.is_push = True
@@ -222,6 +223,7 @@ class Game:
                 move.direction.cardinal,
                 move.direction.length + 1,
             )
+        print(move)
 
         if not self.is_move_legal(move):
             return True
