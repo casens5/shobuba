@@ -56,8 +56,11 @@ class Game:
             [1, 1, 1, 1, None, None, None, None, None, None, None, None, 2, 2, 2, 2],
         ]
 
+    def get_player_number(self):
+        return 1 if self.player_turn == "black" else 2
+
     def update_board(self, move):
-        player = 1 if self.player_turn == "black" else 2
+        player = self.get_player_number()
         self.board[move.passive.board][move.passive.origin] = None
         self.board[move.passive.board][move.passive.destination] = player
         self.board[move.active.board][move.active.origin] = None
@@ -136,6 +139,7 @@ class Game:
         if move.active.is_push:
             stones = bool(self.board[move.active.board][move.active.destination])
 
+            midpoint = None
             if move.direction.length == 2:
                 midpoint = move.active.origin + (
                     (move.active.destination - move.active.origin) // 2
@@ -149,6 +153,14 @@ class Game:
 
             if stones > 1:
                 print("you can't push 2 stones in a row")
+                return False
+
+            player = self.get_player_number()
+            if (
+                midpoint is not None
+                and self.board[move.active.board][midpoint] == player
+            ) or self.board[move.active.board][move.active.destination] == player:
+                print("you can't push your own color stones")
                 return False
 
         return True
