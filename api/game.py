@@ -40,6 +40,21 @@ class Game:
             [1, 1, 1, 1, None, None, None, None, None, None, None, None, 2, 2, 2, 2],
         ]
 
+    def update_board(self, move):
+        player = self.board[move.passive.board][move.passive.origin]
+        self.board[move.passive.board][move.passive.origin] = None
+        self.board[move.passive.board][move.passive.destination] = player
+        self.board[move.active.board][move.active.origin] = None
+        self.board[move.active.board][move.active.destination] = player
+
+        if move.active.is_push:
+            opponent = 2 if player == 1 else 1
+            if move.active.push_destination:
+                self.board[move.active.board][move.active.push_destination] = opponent
+            if move.direction.length == 2:
+                between = move.active.destination - move.active.origin
+                self.board[move.active.board][between] = None
+
     def pretty_print(self):
         value_to_symbol = {
             None: ".",
@@ -60,6 +75,8 @@ class Game:
                     )
                 )
             print()
+
+        print(f"{self.player_turn}'s turn")
 
     def change_turn(self):
         if self.player_turn == "black":
@@ -104,10 +121,10 @@ class Game:
 
         return True
 
-    def is_push(self, move):
+    def is_move_push(self, move):
         move_diff = (
             move.active.destination - move.active.origin
-        ) / move.direction.length
+        ) // move.direction.length
         if self.board[move.active.board][move.active.origin + move_diff]:
             return True
         if (
@@ -193,6 +210,27 @@ class Game:
 
         return move
 
+    def play_move(self, move):
+        if not move:
+            return True
+        print(move)
+
+        if self.is_move_push(move):
+            move.active.is_push = True
+            move.active.push_destination = self.get_move_destination(
+                move.active.origin,
+                move.direction.cardinal,
+                move.direction.length + 1,
+            )
+
+        if not self.is_move_legal(move):
+            return True
+
+        self.update_board(move)
+        self.change_turn()
+
+        self.pretty_print()
+
     def run_command(self, command):
         move_pattern = r"""
             ^                         
@@ -222,20 +260,8 @@ class Game:
         # move syntax match
         elif match:
             move = self.parse_move(match)
-            if not move:
-                return True
-            print(move)
 
-            if self.is_move_push(move):
-                move.active.is_push = True
-                move.active.push_destination = self.get_move_destination(
-                    move.active.origin,
-                    move.direction.cardinal,
-                    move.direction.length + 1,
-                )
-
-            if not self.is_move_legal(move):
-                return True
+            self.play_move(move)
 
             return True
         else:
