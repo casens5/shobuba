@@ -59,6 +59,9 @@ class Game:
     def get_player_number(self):
         return 1 if self.player_turn == "black" else 2
 
+    def get_move_midpoint(self, origin, destination):
+        return origin + ((destination - origin) // 2)
+
     def update_board(self, move):
         player = self.get_player_number()
         self.board[move.passive.board][move.passive.origin] = None
@@ -71,8 +74,8 @@ class Game:
             if move.active.push_destination is not None:
                 self.board[move.active.board][move.active.push_destination] = opponent
             if move.direction.length == 2:
-                midpoint = move.active.origin + (
-                    (move.active.destination - move.active.origin) // 2
+                midpoint = self.get_move_midpoint(
+                    move.active.origin, move.active.destination
                 )
                 self.board[move.active.board][midpoint] = None
 
@@ -136,13 +139,26 @@ class Game:
             print(f"no stone exists on {board_letter}{move.active.origin + 1}")
             return False
 
+        passive_midpoint = None
+        if move.direction.length == 2:
+            passive_midpoint = self.get_move_midpoint(
+                move.passive.origin, move.passive.destination
+            )
+
+        if (
+            passive_midpoint is not None
+            and self.board[move.passive.board][passive_midpoint] is not None
+        ) or self.board[move.passive.board][move.passive.destination] is not None:
+            print("you can't push stones with the passive move")
+            return False
+
         if move.active.is_push:
             stones = bool(self.board[move.active.board][move.active.destination])
 
             midpoint = None
             if move.direction.length == 2:
-                midpoint = move.active.origin + (
-                    (move.active.destination - move.active.origin) // 2
+                midpoint = self.get_move_midpoint(
+                    move.active.origin, move.active.destination
                 )
                 stones += bool(self.board[move.active.board][midpoint])
 
