@@ -69,7 +69,7 @@ class Game:
                 self.board[move.active.board][move.active.push_destination] = opponent
             if move.direction.length == 2:
                 midpoint = move.active.origin + (
-                    move.active.destination - move.active.origin
+                    (move.active.destination - move.active.origin) // 2
                 )
                 self.board[move.active.board][midpoint] = None
 
@@ -138,7 +138,7 @@ class Game:
 
             if move.direction.length == 2:
                 midpoint = move.active.origin + (
-                    move.active.destination - move.active.origin
+                    (move.active.destination - move.active.origin) // 2
                 )
                 stones += bool(self.board[move.active.board][midpoint])
 
