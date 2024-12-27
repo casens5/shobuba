@@ -125,11 +125,22 @@ class Game:
             print("passive move must be in your home board")
             return False
 
+        player = self.get_player_number()
+
         if self.boards[move.passive.board][move.passive.origin] is None:
             board_letter = list(self.letter_to_index.keys())[
                 list(self.letter_to_index.values()).index(move.passive.board)
             ]
             print(f"no stone exists on {board_letter}{move.passive.origin + 1}")
+            return False
+
+        if self.boards[move.passive.board][move.passive.origin] is not player:
+            board_letter = list(self.letter_to_index.keys())[
+                list(self.letter_to_index.values()).index(move.passive.board)
+            ]
+            print(
+                f"{board_letter}{move.passive.origin + 1} does not belong to {player}"
+            )
             return False
 
         if self.boards[move.active.board][move.active.origin] is None:
@@ -139,11 +150,18 @@ class Game:
             print(f"no stone exists on {board_letter}{move.active.origin + 1}")
             return False
 
-        passive_midpoint = None
-        if move.direction.length == 2:
-            passive_midpoint = self.get_move_midpoint(
-                move.passive.origin, move.passive.destination
-            )
+        if self.boards[move.active.board][move.active.origin] is not player:
+            board_letter = list(self.letter_to_index.keys())[
+                list(self.letter_to_index.values()).index(move.active.board)
+            ]
+            print(f"{board_letter}{move.active.origin + 1} does not belong to {player}")
+            return False
+
+        passive_midpoint = (
+            self.get_move_midpoint(move.passive.origin, move.passive.destination)
+            if move.direction.length == 2
+            else None
+        )
 
         if (
             passive_midpoint is not None
@@ -171,7 +189,6 @@ class Game:
                 print("you can't push 2 stones in a row")
                 return False
 
-            player = self.get_player_number()
             if (
                 midpoint is not None
                 and self.boards[move.active.board][midpoint] == player
