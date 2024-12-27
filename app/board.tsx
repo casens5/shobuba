@@ -104,7 +104,7 @@ type CellProps = {
   className?: string;
 };
 
-export function Cell({
+function Cell({
   cell,
   row,
   col,
@@ -369,8 +369,8 @@ const Board = forwardRef((props: BoardProps, ref) => {
       if (
         (board[newCoords[0]][newCoords[1]] &&
           board[newCoords[0]][newCoords[1]]!.color === playerTurn) ||
-          (board[betweenCoords[0]][betweenCoords[1]] &&
-            board[betweenCoords[0]][betweenCoords[1]]!.color === playerTurn)
+        (board[betweenCoords[0]][betweenCoords[1]] &&
+          board[betweenCoords[0]][betweenCoords[1]]!.color === playerTurn)
       ) {
         onMessage(BoardMessage.MOVESAMECOLORBLOCKING);
         return false;

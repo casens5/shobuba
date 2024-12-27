@@ -13,7 +13,7 @@ type TurnIndicatorProps = {
   playerTurn: PlayerColor;
 };
 
-export function TurnIndicator({ playerTurn }: TurnIndicatorProps) {
+function TurnIndicator({ playerTurn }: TurnIndicatorProps) {
   return <div className="mb-4 text-center">{playerTurn}&apos;s turn</div>;
 }
 
@@ -21,7 +21,7 @@ type WinIndicatorProps = {
   playerWin: PlayerColor;
 };
 
-export function WinIndicator({ playerWin }: WinIndicatorProps) {
+function WinIndicator({ playerWin }: WinIndicatorProps) {
   return <div className="mb-4 text-center">{playerWin} is the winner</div>;
 }
 
@@ -29,7 +29,7 @@ type ErrorMessageProps = {
   message: BoardMessage;
 };
 
-export function ErrorMessage({ message }: ErrorMessageProps) {
+function ErrorMessage({ message }: ErrorMessageProps) {
   return (
     <div className="mb-4 text-center">
       {message === BoardMessage.MOVEUNEQUALTOPASSIVEMOVE &&
@@ -58,7 +58,7 @@ type HomeAreaProps = {
   children: ReactNode;
 };
 
-export function HomeArea({ color, children }: HomeAreaProps) {
+function HomeArea({ color, children }: HomeAreaProps) {
   return (
     <div
       className={clsx(

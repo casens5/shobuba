@@ -11,7 +11,7 @@ import React, {
 } from "react";
 import { StoneId, StoneObject } from "./types";
 
-export type StoneProps = StoneObject & {
+type StoneProps = StoneObject & {
   containerWidth: number;
   handleMoveStoneAction: (id: StoneId, newPosition: [number, number]) => void;
 };
