@@ -31,6 +31,7 @@ class Game:
         self.boards = []
         self.initialize_boards()
         self.player_turn = "black"
+        self.winner = None
         self.letter_to_index = {
             "a": 0,
             "b": 1,
@@ -281,12 +282,23 @@ class Game:
         print(move)
 
         if not self.is_move_legal(move):
-            return True
+            return None
 
         self.update_boards(move)
+        self.check_win()
+        if self.winner is not None:
+            print(f"{self.winner} is the winner")
+            return None
+
         self.change_turn()
 
         self.pretty_print()
+
+        return None
+
+    def check_win(self):
+        self.winner = "black" if any(2 not in board for board in self.boards) else None
+        self.winner = "white" if any(1 not in board for board in self.boards) else None
 
     def run_command(self, command):
         move_pattern = r"""
@@ -313,9 +325,14 @@ class Game:
             return True
         elif command == "restart":
             self.initialize_boards()
+            self.winner = None
             return True
         # move syntax match
         elif match:
+            if self.winner is not None:
+                print("enter 'restart' to play a new game")
+                return True
+
             move = self.parse_move(match)
             if move is None:
                 return True
