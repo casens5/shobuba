@@ -65,7 +65,7 @@ class Game:
 
         if move.active.is_push:
             opponent = 2 if player == 1 else 1
-            if move.active.push_destination:
+            if move.active.push_destination is not None:
                 self.board[move.active.board][move.active.push_destination] = opponent
             if move.direction.length == 2:
                 midpoint = move.active.origin + (
@@ -119,14 +119,14 @@ class Game:
             print("passive move must be in your home board")
             return False
 
-        if not self.board[move.passive.board][move.passive.origin]:
+        if self.board[move.passive.board][move.passive.origin] is None:
             board_letter = list(self.letter_to_index.keys())[
                 list(self.letter_to_index.values()).index(move.passive.board)
             ]
             print(f"no stone exists on {board_letter}{move.passive.origin + 1}")
             return False
 
-        if not self.board[move.active.board][move.active.origin]:
+        if self.board[move.active.board][move.active.origin] is None:
             board_letter = list(self.letter_to_index.keys())[
                 list(self.letter_to_index.values()).index(move.active.board)
             ]
@@ -142,7 +142,7 @@ class Game:
                 )
                 stones += bool(self.board[move.active.board][midpoint])
 
-            if move.active.push_destination:
+            if move.active.push_destination is not None:
                 stones += bool(
                     self.board[move.active.board][move.active.push_destination]
                 )
@@ -157,11 +157,12 @@ class Game:
         move_diff = (
             move.active.destination - move.active.origin
         ) // move.direction.length
-        if self.board[move.active.board][move.active.origin + move_diff]:
+        if self.board[move.active.board][move.active.origin + move_diff] is not None:
             return True
         if (
             move.direction.length == 2
             and self.board[move.active.board][move.active.origin + (move_diff * 2)]
+            is not None
         ):
             return True
 
@@ -219,16 +220,13 @@ class Game:
             move.active.origin, move.direction.cardinal, move.direction.length
         )
 
-        if not move.passive.destination or not move.active.destination:
+        if move.passive.destination is None or move.active.destination is None:
             print("move is out of bounds")
-            return False
+            return None
 
         return move
 
     def play_move(self, move):
-        if not move:
-            return True
-
         if self.is_move_push(move):
             move.active.is_push = True
             move.active.push_destination = self.get_move_destination(
@@ -275,6 +273,8 @@ class Game:
         # move syntax match
         elif match:
             move = self.parse_move(match)
+            if move is None:
+                return True
 
             self.play_move(move)
 
