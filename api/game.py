@@ -30,7 +30,7 @@ class Game:
     def __init__(self):
         self.board = []
         self.initialize_board()
-        self.playerTurn = "black"
+        self.player_turn = "black"
 
     def initialize_board(self):
         self.board = [
@@ -62,10 +62,10 @@ class Game:
             print()
 
     def change_turn(self):
-        if self.playerTurn == "black":
-            self.playerTurn = "white"
+        if self.player_turn == "black":
+            self.player_turn = "white"
         else:
-            self.playerTurn = "black"
+            self.player_turn = "black"
 
     def is_move_legal(self, move):
         if (
@@ -78,8 +78,8 @@ class Game:
             print("active and passive moves can't be on the same color")
             return False
 
-        if (self.playerTurn == "white" and move.passive.board < 2) or (
-            self.playerTurn == "black" and move.passive.board > 1
+        if (self.player_turn == "white" and move.passive.board < 2) or (
+            self.player_turn == "black" and move.passive.board > 1
         ):
             print("passive move must be in your home board")
             return False
