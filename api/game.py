@@ -80,7 +80,7 @@ class Game:
                 )
                 self.boards[move.active.board][midpoint] = None
 
-    def pretty_print(self):
+    def print_board(self):
         value_to_symbol = {
             None: ".",
             1: "X",
@@ -101,6 +101,9 @@ class Game:
                 )
             print()
 
+        self.print_current_player()
+
+    def print_current_player(self):
         print(f"{self.player_turn}'s turn")
 
     def change_turn(self):
@@ -295,7 +298,7 @@ class Game:
 
         self.change_turn()
 
-        self.pretty_print()
+        self.print_board()
 
         return None
 
@@ -324,7 +327,7 @@ class Game:
             print("exiting...")
             return False
         elif command == "read":
-            self.pretty_print()
+            self.print_board()
             return True
         elif command == "restart":
             self.initialize_boards()
@@ -349,7 +352,7 @@ class Game:
 
 
 game = Game()
-game.pretty_print
+game.print_board()
 
 print("Enter 'quit' to exit.")
 while True:
