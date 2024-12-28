@@ -110,9 +110,12 @@ class Game:
             self.player_turn = "black"
 
     def is_move_legal(self, move):
+        if move.passive.board == move.active.board:
+            print("active and passive moves must be on different boards")
+            return False
+
         if (
-            move.passive.board == move.active.board
-            or (move.passive.board == 0 and move.active.board == 3)
+            (move.passive.board == 0 and move.active.board == 3)
             or (move.passive.board == 1 and move.active.board == 2)
             or (move.passive.board == 2 and move.active.board == 1)
             or (move.passive.board == 3 and move.active.board == 0)
