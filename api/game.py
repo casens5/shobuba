@@ -136,10 +136,12 @@ class Game:
                 )
                 self._boards[move.active.board][midpoint] = None
 
-    def get_move_midpoint(self, origin, destination):
+    @staticmethod
+    def get_move_midpoint(origin, destination):
         return origin + ((destination - origin) // 2)
 
-    def get_move_destination(self, origin, direction, length):
+    @staticmethod
+    def get_move_destination(origin, direction, length):
         x = origin % 4
         y = origin // 4
 
@@ -160,7 +162,8 @@ class Game:
             return (y * 4) + x
 
     ### move validation
-    def is_move_legal(self, move):
+    @staticmethod
+    def is_move_legal(move, boards, player):
         if move.passive.board == move.active.board:
             print("active and passive moves must be on different boards")
             return False
@@ -174,86 +177,82 @@ class Game:
             print("active and passive moves can't be on the same color")
             return False
 
-        if (self._player_turn == "white" and move.passive.board < 2) or (
-            self._player_turn == "black" and move.passive.board > 1
+        if (player == 2 and move.passive.board < 2) or (
+            player == 1 and move.passive.board > 1
         ):
             print("passive move must be in your home board")
             return False
 
-        player = self.get_player_number()
-
-        if self._boards[move.passive.board][move.passive.origin] is None:
+        if boards[move.passive.board][move.passive.origin] is None:
             board_letter = index_to_board_letter(move.passive.board)
             print(f"no stone exists on {board_letter}{move.passive.origin + 1}")
             return False
 
-        if self._boards[move.passive.board][move.passive.origin] is not player:
+        if boards[move.passive.board][move.passive.origin] is not player:
             board_letter = index_to_board_letter(move.passive.board)
             print(
                 f"{board_letter}{move.passive.origin + 1} does not belong to {player}"
             )
             return False
 
-        if self._boards[move.active.board][move.active.origin] is None:
+        if boards[move.active.board][move.active.origin] is None:
             board_letter = index_to_board_letter(move.active.board)
             print(f"no stone exists on {board_letter}{move.active.origin + 1}")
             return False
 
-        if self._boards[move.active.board][move.active.origin] is not player:
+        if boards[move.active.board][move.active.origin] is not player:
             board_letter = index_to_board_letter(move.active.board)
             print(f"{board_letter}{move.active.origin + 1} does not belong to {player}")
             return False
 
         passive_midpoint = (
-            self.get_move_midpoint(move.passive.origin, move.passive.destination)
+            Game.get_move_midpoint(move.passive.origin, move.passive.destination)
             if move.direction.length == 2
             else None
         )
 
         if (
             passive_midpoint is not None
-            and self._boards[move.passive.board][passive_midpoint] is not None
-        ) or self._boards[move.passive.board][move.passive.destination] is not None:
+            and boards[move.passive.board][passive_midpoint] is not None
+        ) or boards[move.passive.board][move.passive.destination] is not None:
             print("you can't push stones with the passive move")
             return False
 
         if move.active.is_push:
-            stones = bool(self._boards[move.active.board][move.active.destination])
+            stones = bool(boards[move.active.board][move.active.destination])
 
             midpoint = None
             if move.direction.length == 2:
-                midpoint = self.get_move_midpoint(
+                midpoint = Game.get_move_midpoint(
                     move.active.origin, move.active.destination
                 )
-                stones += bool(self._boards[move.active.board][midpoint])
+                stones += bool(boards[move.active.board][midpoint])
 
             if move.active.push_destination is not None:
-                stones += bool(
-                    self._boards[move.active.board][move.active.push_destination]
-                )
+                stones += bool(boards[move.active.board][move.active.push_destination])
 
             if stones > 1:
                 print("you can't push 2 stones in a row")
                 return False
 
             if (
-                midpoint is not None
-                and self._boards[move.active.board][midpoint] == player
-            ) or self._boards[move.active.board][move.active.destination] == player:
+                midpoint is not None and boards[move.active.board][midpoint] == player
+            ) or boards[move.active.board][move.active.destination] == player:
                 print("you can't push your own color stones")
                 return False
 
         return True
 
-    def is_move_push(self, move):
+    @staticmethod
+    def is_move_push(move, boards):
         move_diff = (
             move.active.destination - move.active.origin
         ) // move.direction.length
-        if self._boards[move.active.board][move.active.origin + move_diff] is not None:
+        if boards[move.active.board][move.active.origin + move_diff] is not None:
             return True
         if (
             move.direction.length == 2
-            and self._boards[move.active.board][move.active.origin + (move_diff * 2)]
+            and boards[move.active.board][move.active.origin + (move_diff * 2)]
             is not None
         ):
             return True
@@ -262,7 +261,7 @@ class Game:
 
     ### gameplay execution
     def play_move(self, move):
-        if self.is_move_push(move):
+        if self.is_move_push(move, self._boards):
             move.active.is_push = True
             move.active.push_destination = self.get_move_destination(
                 move.active.origin,
@@ -270,7 +269,7 @@ class Game:
                 move.direction.length + 1,
             )
 
-        if not self.is_move_legal(move):
+        if not self.is_move_legal(move, self._boards, self.get_player_number()):
             return
 
         self.update_boards(move)
