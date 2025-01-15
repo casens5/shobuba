@@ -224,6 +224,7 @@ class Game:
         x = origin % 4
         y = origin // 4
 
+        # 1 or 2 of these if checks will match
         if direction == 7 or direction < 2:
             y -= length
         if direction > 2 and direction < 6:
@@ -234,7 +235,8 @@ class Game:
             x += length
 
         if x < 0 or y < 0 or x > 3 or y > 3:
-            return None
+            # out of bounds
+            return
         else:
             return (y * 4) + x
 
@@ -262,7 +264,7 @@ class Game:
             or move.passive.origin < 0
         ):
             print("invalid coordinates")
-            return None
+            return
 
         move.passive.destination = self.get_move_destination(
             move.passive.origin, move.direction.cardinal, move.direction.length
@@ -273,7 +275,7 @@ class Game:
 
         if move.passive.destination is None or move.active.destination is None:
             print("move is out of bounds")
-            return None
+            return
 
         return move
 
@@ -288,25 +290,25 @@ class Game:
         print(move)
 
         if not self.is_move_legal(move):
-            return None
+            return
 
         self.update_boards(move)
         self.check_win()
         if self.winner is not None:
             print(f"{self.winner} is the winner")
-            return None
+            return
 
         self.change_turn()
 
         self.print_board()
 
-        return None
+        return
 
     def check_win(self):
         self.winner = "black" if any(2 not in board for board in self.boards) else None
         self.winner = "white" if any(1 not in board for board in self.boards) else None
 
-    def run_command(self, command):
+    def run_user_command(self, command):
         move_pattern = r"""
             ^                         
             ([a-d])               
@@ -325,30 +327,31 @@ class Game:
 
         if command == "quit" or command == "q" or command == ":q":
             print("exiting...")
-            return False
+            return True
         elif command == "read":
             self.print_board()
-            return True
+            return
         elif command == "restart":
             self.initialize_boards()
             self.winner = None
-            return True
+            self.player_turn = "black"
+            return
         # move syntax match
         elif match:
             if self.winner is not None:
                 print("enter 'restart' to play a new game")
-                return True
+                return
 
             move = self.parse_move(match)
             if move is None:
-                return True
+                return
 
             self.play_move(move)
 
-            return True
+            return
         else:
-            print("invalid input")
-            return True
+            print(f"i don't understand input: {command}")
+            return
 
 
 game = Game()
@@ -357,5 +360,5 @@ game.print_board()
 print("Enter 'quit' to exit.")
 while True:
     user_input = input("~> ").strip().lower()
-    if not game.run_command(user_input):
+    if game.run_user_command(user_input):
         break
