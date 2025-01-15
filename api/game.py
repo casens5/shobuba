@@ -27,6 +27,7 @@ class Move:
 
 
 class Game:
+    ### initialization and UI functions
     def __init__(self):
         self.boards = []
         self.initialize_boards()
@@ -57,29 +58,6 @@ class Game:
             [1, 1, 1, 1, None, None, None, None, None, None, None, None, 2, 2, 2, 2],
         ]
 
-    def get_player_number(self):
-        return 1 if self.player_turn == "black" else 2
-
-    def get_move_midpoint(self, origin, destination):
-        return origin + ((destination - origin) // 2)
-
-    def update_boards(self, move):
-        player = self.get_player_number()
-        self.boards[move.passive.board][move.passive.origin] = None
-        self.boards[move.passive.board][move.passive.destination] = player
-        self.boards[move.active.board][move.active.origin] = None
-        self.boards[move.active.board][move.active.destination] = player
-
-        if move.active.is_push:
-            opponent = 2 if player == 1 else 1
-            if move.active.push_destination is not None:
-                self.boards[move.active.board][move.active.push_destination] = opponent
-            if move.direction.length == 2:
-                midpoint = self.get_move_midpoint(
-                    move.active.origin, move.active.destination
-                )
-                self.boards[move.active.board][midpoint] = None
-
     def print_board(self):
         value_to_symbol = {
             None: ".",
@@ -106,12 +84,61 @@ class Game:
     def print_current_player(self):
         print(f"{self.player_turn}'s turn")
 
+    ### game logic
+    def get_player_number(self):
+        return 1 if self.player_turn == "black" else 2
+
     def change_turn(self):
         if self.player_turn == "black":
             self.player_turn = "white"
         else:
             self.player_turn = "black"
 
+    def check_win(self):
+        self.winner = "black" if any(2 not in board for board in self.boards) else None
+        self.winner = "white" if any(1 not in board for board in self.boards) else None
+
+    def update_boards(self, move):
+        player = self.get_player_number()
+        self.boards[move.passive.board][move.passive.origin] = None
+        self.boards[move.passive.board][move.passive.destination] = player
+        self.boards[move.active.board][move.active.origin] = None
+        self.boards[move.active.board][move.active.destination] = player
+
+        if move.active.is_push:
+            opponent = 2 if player == 1 else 1
+            if move.active.push_destination is not None:
+                self.boards[move.active.board][move.active.push_destination] = opponent
+            if move.direction.length == 2:
+                midpoint = self.get_move_midpoint(
+                    move.active.origin, move.active.destination
+                )
+                self.boards[move.active.board][midpoint] = None
+
+    def get_move_midpoint(self, origin, destination):
+        return origin + ((destination - origin) // 2)
+
+    def get_move_destination(self, origin, direction, length):
+        x = origin % 4
+        y = origin // 4
+
+        # 1 or 2 of these if checks will match
+        if direction == 7 or direction < 2:
+            y -= length
+        if direction > 2 and direction < 6:
+            y += length
+        if direction > 4:
+            x -= length
+        if direction > 0 and direction < 4:
+            x += length
+
+        if x < 0 or y < 0 or x > 3 or y > 3:
+            # out of bounds
+            return
+        else:
+            return (y * 4) + x
+
+    ### move validation
     def is_move_legal(self, move):
         if move.passive.board == move.active.board:
             print("active and passive moves must be on different boards")
@@ -220,25 +247,31 @@ class Game:
 
         return False
 
-    def get_move_destination(self, origin, direction, length):
-        x = origin % 4
-        y = origin // 4
+    ### gameplay execution
+    def play_move(self, move):
+        if self.is_move_push(move):
+            move.active.is_push = True
+            move.active.push_destination = self.get_move_destination(
+                move.active.origin,
+                move.direction.cardinal,
+                move.direction.length + 1,
+            )
+        print(move)
 
-        # 1 or 2 of these if checks will match
-        if direction == 7 or direction < 2:
-            y -= length
-        if direction > 2 and direction < 6:
-            y += length
-        if direction > 4:
-            x -= length
-        if direction > 0 and direction < 4:
-            x += length
-
-        if x < 0 or y < 0 or x > 3 or y > 3:
-            # out of bounds
+        if not self.is_move_legal(move):
             return
-        else:
-            return (y * 4) + x
+
+        self.update_boards(move)
+        self.check_win()
+        if self.winner is not None:
+            print(f"{self.winner} is the winner")
+            return
+
+        self.change_turn()
+
+        self.print_board()
+
+        return
 
     def parse_move(self, input_match):
         groups = input_match.groups()
@@ -279,36 +312,7 @@ class Game:
 
         return move
 
-    def play_move(self, move):
-        if self.is_move_push(move):
-            move.active.is_push = True
-            move.active.push_destination = self.get_move_destination(
-                move.active.origin,
-                move.direction.cardinal,
-                move.direction.length + 1,
-            )
-        print(move)
-
-        if not self.is_move_legal(move):
-            return
-
-        self.update_boards(move)
-        self.check_win()
-        if self.winner is not None:
-            print(f"{self.winner} is the winner")
-            return
-
-        self.change_turn()
-
-        self.print_board()
-
-        return
-
-    def check_win(self):
-        self.winner = "black" if any(2 not in board for board in self.boards) else None
-        self.winner = "white" if any(1 not in board for board in self.boards) else None
-
-    def run_user_command(self, command):
+    def process_user_command(self, command):
         move_pattern = r"""
             ^                         
             ([a-d])               
@@ -360,5 +364,5 @@ game.print_board()
 print("Enter 'quit' to exit.")
 while True:
     user_input = input("~> ").strip().lower()
-    if game.run_user_command(user_input):
+    if game.process_user_command(user_input):
         break
