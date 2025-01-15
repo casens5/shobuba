@@ -29,7 +29,7 @@ class Move:
 class Game:
     ### initialization and UI functions
     def __init__(self):
-        self.boards = []
+        self._boards = []
         self.initialize_boards()
         self.player_turn = "black"
         self.winner = None
@@ -50,8 +50,12 @@ class Game:
             "nw": 7,
         }
 
+    @property
+    def boards(self):
+        return self._boards
+
     def initialize_boards(self):
-        self.boards = [
+        self._boards = [
             [1, 1, 1, 1, None, None, None, None, None, None, None, None, 2, 2, 2, 2],
             [1, 1, 1, 1, None, None, None, None, None, None, None, None, 2, 2, 2, 2],
             [1, 1, 1, 1, None, None, None, None, None, None, None, None, 2, 2, 2, 2],
@@ -65,7 +69,7 @@ class Game:
             2: "O",
         }
 
-        grids = [np.array(row).reshape(4, 4) for row in self.boards]
+        grids = [np.array(row).reshape(4, 4) for row in self._boards]
         grid_layout = np.array(grids).reshape(2, 2, 4, 4)
 
         print()
@@ -95,25 +99,25 @@ class Game:
             self.player_turn = "black"
 
     def check_win(self):
-        self.winner = "black" if any(2 not in board for board in self.boards) else None
-        self.winner = "white" if any(1 not in board for board in self.boards) else None
+        self.winner = "black" if any(2 not in board for board in self._boards) else None
+        self.winner = "white" if any(1 not in board for board in self._boards) else None
 
     def update_boards(self, move):
         player = self.get_player_number()
-        self.boards[move.passive.board][move.passive.origin] = None
-        self.boards[move.passive.board][move.passive.destination] = player
-        self.boards[move.active.board][move.active.origin] = None
-        self.boards[move.active.board][move.active.destination] = player
+        self._boards[move.passive.board][move.passive.origin] = None
+        self._boards[move.passive.board][move.passive.destination] = player
+        self._boards[move.active.board][move.active.origin] = None
+        self._boards[move.active.board][move.active.destination] = player
 
         if move.active.is_push:
             opponent = 2 if player == 1 else 1
             if move.active.push_destination is not None:
-                self.boards[move.active.board][move.active.push_destination] = opponent
+                self._boards[move.active.board][move.active.push_destination] = opponent
             if move.direction.length == 2:
                 midpoint = self.get_move_midpoint(
                     move.active.origin, move.active.destination
                 )
-                self.boards[move.active.board][midpoint] = None
+                self._boards[move.active.board][midpoint] = None
 
     def get_move_midpoint(self, origin, destination):
         return origin + ((destination - origin) // 2)
@@ -161,14 +165,14 @@ class Game:
 
         player = self.get_player_number()
 
-        if self.boards[move.passive.board][move.passive.origin] is None:
+        if self._boards[move.passive.board][move.passive.origin] is None:
             board_letter = list(self.letter_to_index.keys())[
                 list(self.letter_to_index.values()).index(move.passive.board)
             ]
             print(f"no stone exists on {board_letter}{move.passive.origin + 1}")
             return False
 
-        if self.boards[move.passive.board][move.passive.origin] is not player:
+        if self._boards[move.passive.board][move.passive.origin] is not player:
             board_letter = list(self.letter_to_index.keys())[
                 list(self.letter_to_index.values()).index(move.passive.board)
             ]
@@ -177,14 +181,14 @@ class Game:
             )
             return False
 
-        if self.boards[move.active.board][move.active.origin] is None:
+        if self._boards[move.active.board][move.active.origin] is None:
             board_letter = list(self.letter_to_index.keys())[
                 list(self.letter_to_index.values()).index(move.active.board)
             ]
             print(f"no stone exists on {board_letter}{move.active.origin + 1}")
             return False
 
-        if self.boards[move.active.board][move.active.origin] is not player:
+        if self._boards[move.active.board][move.active.origin] is not player:
             board_letter = list(self.letter_to_index.keys())[
                 list(self.letter_to_index.values()).index(move.active.board)
             ]
@@ -199,24 +203,24 @@ class Game:
 
         if (
             passive_midpoint is not None
-            and self.boards[move.passive.board][passive_midpoint] is not None
-        ) or self.boards[move.passive.board][move.passive.destination] is not None:
+            and self._boards[move.passive.board][passive_midpoint] is not None
+        ) or self._boards[move.passive.board][move.passive.destination] is not None:
             print("you can't push stones with the passive move")
             return False
 
         if move.active.is_push:
-            stones = bool(self.boards[move.active.board][move.active.destination])
+            stones = bool(self._boards[move.active.board][move.active.destination])
 
             midpoint = None
             if move.direction.length == 2:
                 midpoint = self.get_move_midpoint(
                     move.active.origin, move.active.destination
                 )
-                stones += bool(self.boards[move.active.board][midpoint])
+                stones += bool(self._boards[move.active.board][midpoint])
 
             if move.active.push_destination is not None:
                 stones += bool(
-                    self.boards[move.active.board][move.active.push_destination]
+                    self._boards[move.active.board][move.active.push_destination]
                 )
 
             if stones > 1:
@@ -225,8 +229,8 @@ class Game:
 
             if (
                 midpoint is not None
-                and self.boards[move.active.board][midpoint] == player
-            ) or self.boards[move.active.board][move.active.destination] == player:
+                and self._boards[move.active.board][midpoint] == player
+            ) or self._boards[move.active.board][move.active.destination] == player:
                 print("you can't push your own color stones")
                 return False
 
@@ -236,11 +240,11 @@ class Game:
         move_diff = (
             move.active.destination - move.active.origin
         ) // move.direction.length
-        if self.boards[move.active.board][move.active.origin + move_diff] is not None:
+        if self._boards[move.active.board][move.active.origin + move_diff] is not None:
             return True
         if (
             move.direction.length == 2
-            and self.boards[move.active.board][move.active.origin + (move_diff * 2)]
+            and self._boards[move.active.board][move.active.origin + (move_diff * 2)]
             is not None
         ):
             return True
