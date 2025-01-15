@@ -31,7 +31,7 @@ class Game:
     def __init__(self):
         self._boards = []
         self.initialize_boards()
-        self.player_turn = "black"
+        self._player_turn = "black"
         self.winner = None
         self.letter_to_index = {
             "a": 0,
@@ -53,6 +53,10 @@ class Game:
     @property
     def boards(self):
         return self._boards
+
+    @property
+    def player_turn(self):
+        return self._player_turn
 
     def initialize_boards(self):
         self._boards = [
@@ -86,17 +90,17 @@ class Game:
         self.print_current_player()
 
     def print_current_player(self):
-        print(f"{self.player_turn}'s turn")
+        print(f"{self._player_turn}'s turn")
 
     ### game logic
     def get_player_number(self):
-        return 1 if self.player_turn == "black" else 2
+        return 1 if self._player_turn == "black" else 2
 
     def change_turn(self):
-        if self.player_turn == "black":
-            self.player_turn = "white"
+        if self._player_turn == "black":
+            self._player_turn = "white"
         else:
-            self.player_turn = "black"
+            self._player_turn = "black"
 
     def check_win(self):
         self.winner = "black" if any(2 not in board for board in self._boards) else None
@@ -157,8 +161,8 @@ class Game:
             print("active and passive moves can't be on the same color")
             return False
 
-        if (self.player_turn == "white" and move.passive.board < 2) or (
-            self.player_turn == "black" and move.passive.board > 1
+        if (self._player_turn == "white" and move.passive.board < 2) or (
+            self._player_turn == "black" and move.passive.board > 1
         ):
             print("passive move must be in your home board")
             return False
@@ -342,7 +346,7 @@ class Game:
         elif command == "restart":
             self.initialize_boards()
             self.winner = None
-            self.player_turn = "black"
+            self._player_turn = "black"
             return
         # move syntax match
         elif match:
