@@ -1,7 +1,28 @@
 import numpy as np
 import re
-
 from dataclasses import dataclass
+
+LETTER_TO_INDEX = {"a": 0, "b": 1, "c": 2, "d": 3}
+INDEX_TO_LETTER = {v: k for k, v in LETTER_TO_INDEX.items()}
+
+CARDINAL_TO_INDEX = {"n": 0, "ne": 1, "e": 2, "se": 3, "s": 4, "sw": 5, "w": 6, "nw": 7}
+INDEX_TO_CARDINAL = {v: k for k, v in CARDINAL_TO_INDEX.items()}
+
+
+def board_letter_to_index(letter: str) -> int:
+    return LETTER_TO_INDEX[letter.lower()]
+
+
+def index_to_board_letter(index: int) -> str:
+    return INDEX_TO_LETTER[index]
+
+
+def cardinal_to_index(cardinal: str) -> int:
+    return CARDINAL_TO_INDEX[cardinal.lower()]
+
+
+def index_to_cardinal(index: int) -> str:
+    return INDEX_TO_CARDINAL[index]
 
 
 @dataclass
@@ -33,22 +54,6 @@ class Game:
         self.initialize_boards()
         self._player_turn = "black"
         self._winner = None
-        self.letter_to_index = {
-            "a": 0,
-            "b": 1,
-            "c": 2,
-            "d": 3,
-        }
-        self.cardinal_to_index = {
-            "n": 0,
-            "ne": 1,
-            "e": 2,
-            "se": 3,
-            "s": 4,
-            "sw": 5,
-            "w": 6,
-            "nw": 7,
-        }
 
     @property
     def boards(self):
@@ -178,32 +183,24 @@ class Game:
         player = self.get_player_number()
 
         if self._boards[move.passive.board][move.passive.origin] is None:
-            board_letter = list(self.letter_to_index.keys())[
-                list(self.letter_to_index.values()).index(move.passive.board)
-            ]
+            board_letter = index_to_board_letter(move.passive.board)
             print(f"no stone exists on {board_letter}{move.passive.origin + 1}")
             return False
 
         if self._boards[move.passive.board][move.passive.origin] is not player:
-            board_letter = list(self.letter_to_index.keys())[
-                list(self.letter_to_index.values()).index(move.passive.board)
-            ]
+            board_letter = index_to_board_letter(move.passive.board)
             print(
                 f"{board_letter}{move.passive.origin + 1} does not belong to {player}"
             )
             return False
 
         if self._boards[move.active.board][move.active.origin] is None:
-            board_letter = list(self.letter_to_index.keys())[
-                list(self.letter_to_index.values()).index(move.active.board)
-            ]
+            board_letter = index_to_board_letter(move.active.board)
             print(f"no stone exists on {board_letter}{move.active.origin + 1}")
             return False
 
         if self._boards[move.active.board][move.active.origin] is not player:
-            board_letter = list(self.letter_to_index.keys())[
-                list(self.letter_to_index.values()).index(move.active.board)
-            ]
+            board_letter = index_to_board_letter(move.active.board)
             print(f"{board_letter}{move.active.origin + 1} does not belong to {player}")
             return False
 
@@ -272,7 +269,6 @@ class Game:
                 move.direction.cardinal,
                 move.direction.length + 1,
             )
-        print(move)
 
         if not self.is_move_legal(move):
             return
@@ -293,15 +289,15 @@ class Game:
         groups = input_match.groups()
         move = Move(
             passive=BoardMove(
-                board=self.letter_to_index.get(groups[0]),
+                board=board_letter_to_index(groups[0]),
                 origin=int(groups[1]) - 1,
             ),
             active=BoardMove(
-                board=self.letter_to_index.get(groups[4]),
+                board=board_letter_to_index(groups[4]),
                 origin=int(groups[5]) - 1,
             ),
             direction=Direction(
-                cardinal=self.cardinal_to_index.get(groups[2]),
+                cardinal=cardinal_to_index(groups[2]),
                 length=int(groups[3]),
             ),
         )
