@@ -2,6 +2,8 @@ import numpy as np
 import re
 from dataclasses import dataclass
 
+from monte_carlo_ai import MonteCarloAI
+
 LETTER_TO_INDEX = {"a": 0, "b": 1, "c": 2, "d": 3}
 INDEX_TO_LETTER = {v: k for k, v in LETTER_TO_INDEX.items()}
 
@@ -369,11 +371,19 @@ class Game:
             return
 
 
-game = Game()
-game.print_board()
+if __name__ == "__main__":
+    game = Game()
+    ai = MonteCarloAI()
 
-print("Enter 'quit' to exit.")
-while True:
-    user_input = input("~> ").strip().lower()
-    if game.process_user_command(user_input):
-        break
+    game.print_board()
+    print("enter 'quit' to exit.")
+
+    while True:
+        if game.player_turn == "white" and game.winner is None:
+            print("AI's turn...")
+            move = ai.generate_move(game.boards, "white")
+            game.play_move(move)
+        else:
+            user_input = input("~> ").strip().lower()
+            if game.process_user_command(user_input):
+                break
