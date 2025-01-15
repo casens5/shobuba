@@ -32,7 +32,7 @@ class Game:
         self._boards = []
         self.initialize_boards()
         self._player_turn = "black"
-        self.winner = None
+        self._winner = None
         self.letter_to_index = {
             "a": 0,
             "b": 1,
@@ -57,6 +57,10 @@ class Game:
     @property
     def player_turn(self):
         return self._player_turn
+
+    @property
+    def winner(self):
+        return self._winner
 
     def initialize_boards(self):
         self._boards = [
@@ -103,8 +107,12 @@ class Game:
             self._player_turn = "black"
 
     def check_win(self):
-        self.winner = "black" if any(2 not in board for board in self._boards) else None
-        self.winner = "white" if any(1 not in board for board in self._boards) else None
+        self._winner = (
+            "black" if any(2 not in board for board in self._boards) else None
+        )
+        self._winner = (
+            "white" if any(1 not in board for board in self._boards) else None
+        )
 
     def update_boards(self, move):
         player = self.get_player_number()
@@ -271,8 +279,8 @@ class Game:
 
         self.update_boards(move)
         self.check_win()
-        if self.winner is not None:
-            print(f"{self.winner} is the winner")
+        if self._winner is not None:
+            print(f"{self._winner} is the winner")
             return
 
         self.change_turn()
@@ -345,12 +353,12 @@ class Game:
             return
         elif command == "restart":
             self.initialize_boards()
-            self.winner = None
+            self._winner = None
             self._player_turn = "black"
             return
         # move syntax match
         elif match:
-            if self.winner is not None:
+            if self._winner is not None:
                 print("enter 'restart' to play a new game")
                 return
 
