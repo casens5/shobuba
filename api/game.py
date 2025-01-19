@@ -133,7 +133,7 @@ class Game:
             if move.active.push_destination is not None:
                 self._boards[move.active.board][move.active.push_destination] = opponent
             if move.direction.length == 2:
-                midpoint = self.get_move_midpoint(
+                midpoint = get_move_midpoint(
                     move.active.origin, move.active.destination
                 )
                 self._boards[move.active.board][midpoint] = None
@@ -208,7 +208,7 @@ class Game:
             return False
 
         passive_midpoint = (
-            Game.get_move_midpoint(move.passive.origin, move.passive.destination)
+            get_move_midpoint(move.passive.origin, move.passive.destination)
             if move.direction.length == 2
             else None
         )
@@ -225,7 +225,7 @@ class Game:
 
             midpoint = None
             if move.direction.length == 2:
-                midpoint = Game.get_move_midpoint(
+                midpoint = get_move_midpoint(
                     move.active.origin, move.active.destination
                 )
                 stones += bool(boards[move.active.board][midpoint])
@@ -265,13 +265,13 @@ class Game:
     def play_move(self, move):
         if self.is_move_push(move, self._boards):
             move.active.is_push = True
-            move.active.push_destination = self.get_move_destination(
+            move.active.push_destination = get_move_destination(
                 move.active.origin,
                 move.direction.cardinal,
                 move.direction.length + 1,
             )
 
-        if not self.is_move_legal(move, self._boards, self.get_player_number()):
+        if not is_move_legal(move, self._boards, self.get_player_number()):
             return
 
         self.update_boards(move)
@@ -312,10 +312,10 @@ class Game:
             print("invalid coordinates")
             return
 
-        move.passive.destination = self.get_move_destination(
+        move.passive.destination = get_move_destination(
             move.passive.origin, move.direction.cardinal, move.direction.length
         )
-        move.active.destination = self.get_move_destination(
+        move.active.destination = get_move_destination(
             move.active.origin, move.direction.cardinal, move.direction.length
         )
 
