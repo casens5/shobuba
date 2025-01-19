@@ -246,24 +246,21 @@ class Game:
         return True
 
     @staticmethod
-    def is_move_push(move, boards):
-        move_diff = (
-            move.active.destination - move.active.origin
-        ) // move.direction.length
-        if boards[move.active.board][move.active.origin + move_diff] is not None:
-            return True
-        if (
-            move.direction.length == 2
-            and boards[move.active.board][move.active.origin + (move_diff * 2)]
-            is not None
-        ):
+
+    @staticmethod
+    def is_move_push(move, length, boards):
+        if length == 2:
+            midpoint = get_move_midpoint(move.origin, move.destination)
+            if boards[move.board][midpoint] is not None:
+                return True
+        if boards[move.board][move.destination] is not None:
             return True
 
         return False
 
     ### gameplay execution
     def play_move(self, move):
-        if self.is_move_push(move, self._boards):
+        if is_move_push(move.active, move.direction.length, self._boards):
             move.active.is_push = True
             move.active.push_destination = get_move_destination(
                 move.active.origin,
