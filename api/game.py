@@ -279,8 +279,6 @@ class Game:
 
         self.change_turn()
 
-        self.print_board()
-
         return
 
     def parse_move(self, input_match):
@@ -362,6 +360,8 @@ class Game:
 
             self.play_move(move)
 
+            self.print_board()
+
             return
         else:
             print(f"i don't understand input: {command}")
@@ -380,6 +380,8 @@ if __name__ == "__main__":
             print("AI's turn...")
             move = ai.generate_move(game.boards, "white")
             game.play_move(move)
+
+            game.print_board()
         else:
             user_input = input("~> ").strip().lower()
             if game.process_user_command(user_input):
