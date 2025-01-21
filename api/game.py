@@ -77,14 +77,15 @@ class Game:
             [1, 1, 1, 1, None, None, None, None, None, None, None, None, 2, 2, 2, 2],
         ]
 
-    def print_board(self):
+    @staticmethod
+    def print_boards(boards):
         value_to_symbol = {
             None: ".",
             1: "X",
             2: "O",
         }
 
-        grids = [np.array(row).reshape(4, 4) for row in self._boards]
+        grids = [np.array(row).reshape(4, 4) for row in boards]
         grid_layout = np.array(grids).reshape(2, 2, 4, 4)
 
         print()
@@ -97,8 +98,6 @@ class Game:
                     )
                 )
             print()
-
-        self.print_current_player()
 
     def print_current_player(self):
         print(f"{self._player_turn}'s turn")
@@ -133,7 +132,7 @@ class Game:
             if move.active.push_destination is not None:
                 self._boards[move.active.board][move.active.push_destination] = opponent
             if move.direction.length == 2:
-                midpoint = get_move_midpoint(
+                midpoint = self.get_move_midpoint(
                     move.active.origin, move.active.destination
                 )
                 self._boards[move.active.board][midpoint] = None
@@ -246,11 +245,9 @@ class Game:
         return True
 
     @staticmethod
-
-    @staticmethod
     def is_move_push(move, length, boards):
         if length == 2:
-            midpoint = get_move_midpoint(move.origin, move.destination)
+            midpoint = self.get_move_midpoint(move.origin, move.destination)
             if boards[move.board][midpoint] is not None:
                 return True
         if boards[move.board][move.destination] is not None:
@@ -260,15 +257,15 @@ class Game:
 
     ### gameplay execution
     def play_move(self, move):
-        if is_move_push(move.active, move.direction.length, self._boards):
+        if self.is_move_push(move.active, move.direction.length, self._boards):
             move.active.is_push = True
-            move.active.push_destination = get_move_destination(
+            move.active.push_destination = self.get_move_destination(
                 move.active.origin,
                 move.direction.cardinal,
                 move.direction.length + 1,
             )
 
-        if not is_move_legal(move, self._boards, self.get_player_number()):
+        if not self.is_move_legal(move, self._boards, self.get_player_number()):
             return
 
         self.update_boards(move)
@@ -281,7 +278,8 @@ class Game:
 
         return
 
-    def parse_move(self, input_match):
+    @staticmethod
+    def parse_move(input_match):
         groups = input_match.groups()
         move = Move(
             passive=BoardMove(
@@ -307,10 +305,10 @@ class Game:
             print("invalid coordinates")
             return
 
-        move.passive.destination = get_move_destination(
+        move.passive.destination = self.get_move_destination(
             move.passive.origin, move.direction.cardinal, move.direction.length
         )
-        move.active.destination = get_move_destination(
+        move.active.destination = self.get_move_destination(
             move.active.origin, move.direction.cardinal, move.direction.length
         )
 
@@ -341,7 +339,8 @@ class Game:
             print("exiting...")
             return True
         elif command == "read":
-            self.print_board()
+            self.print_boards(self._boards)
+            self.print_current_player()
             return
         elif command == "restart":
             self.initialize_boards()
@@ -360,7 +359,8 @@ class Game:
 
             self.play_move(move)
 
-            self.print_board()
+            self.print_boards(self._boards)
+            self.print_current_player()
 
             return
         else:
@@ -372,7 +372,8 @@ if __name__ == "__main__":
     game = Game()
     ai = MonteCarloAI()
 
-    game.print_board()
+    game.print_boards(game.boards)
+    game.print_current_player()
     print("enter 'quit' to exit.")
 
     while True:
@@ -381,7 +382,8 @@ if __name__ == "__main__":
             move = ai.generate_move(game.boards, "white")
             game.play_move(move)
 
-            game.print_board()
+            game.print_boards(game.boards)
+            game.print_current_player()
         else:
             user_input = input("~> ").strip().lower()
             if game.process_user_command(user_input):
