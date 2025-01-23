@@ -35,11 +35,30 @@ class BoardMove:
     is_push: bool = None
     push_destination: int = None
 
+    def __repr__(self) -> str:
+        return (
+            "BoardMove(\n"
+            f"  board=            {repr(self.board)},\n"
+            f"  origin=           {repr(self.origin)},\n"
+            f"  destination=      {repr(self.destination)},\n"
+            f"  is_push=          {repr(self.is_push)},\n"
+            f"  push_destination= {repr(self.push_destination)},\n"
+            ")"
+        )
+
 
 @dataclass
 class Direction:
     cardinal: int
     length: int
+
+    def __repr__(self) -> str:
+        return (
+            "Direction(\n"
+            f"  cardinal= {repr(self.cardinal)},\n"
+            f"  length=   {repr(self.length)},\n"
+            ")"
+        )
 
 
 @dataclass
@@ -47,6 +66,21 @@ class Move:
     passive: BoardMove
     active: BoardMove
     direction: Direction
+
+    def __repr__(self) -> str:
+        return (
+            "Move(\n"
+            f"  passive=\n{repr(self.passive)},\n"
+            f"  active=\n{repr(self.active)},\n"
+            f"  direction=\n{repr(self.direction)}\n"
+            ")"
+        )
+
+
+class GameError(Exception):
+    """baba"""
+
+    pass
 
 
 class Game:
@@ -178,13 +212,16 @@ class Game:
             ),
         )
 
-        if (
-            move.active.origin > 15
-            or move.passive.origin > 15
-            or move.active.origin < 0
-            or move.passive.origin < 0
-        ):
-            print("invalid coordinates")
+        if move.passive.origin > 15 or move.passive.origin < 0:
+            raise GameError(
+                f"passive move must be between 1 and 16 (inclusive): recieved move \n{move}"
+            )
+            return
+
+        if move.active.origin > 15 or move.active.origin < 0:
+            raise GameError(
+                f"active move must be between 1 and 16 (inclusive): recieved move \n{move}"
+            )
             return
 
         move.passive.destination = Rules.get_move_destination(
@@ -194,8 +231,16 @@ class Game:
             move.active.origin, move.direction.cardinal, move.direction.length
         )
 
-        if move.passive.destination is None or move.active.destination is None:
-            print("move is out of bounds")
+        if move.passive.destination is None:
+            raise GameError(
+                f"passive move destination '{move.passive.destination}' is out of bounds.  recieved move \n{move}"
+            )
+            return
+
+        if move.active.destination is None:
+            raise GameError(
+                f"active move destination '{move.active.destination}' is out of bounds.  recieved move \n{move}"
+            )
             return
 
         return move
@@ -235,8 +280,10 @@ class Game:
                 print("enter 'restart' to play a new game")
                 return
 
-            move = self.parse_move(match)
-            if move is None:
+            try:
+                move = self.parse_move(match)
+            except GameError as e:
+                print(e)
                 return
 
             self.play_move(move)
