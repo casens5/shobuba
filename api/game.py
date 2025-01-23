@@ -147,12 +147,12 @@ class Game:
             self._player_turn = "black"
 
     def check_win(self):
-        self._winner = (
-            "black" if any(2 not in board for board in self._boards) else None
-        )
-        self._winner = (
-            "white" if any(1 not in board for board in self._boards) else None
-        )
+        if any(2 not in board for board in self._boards):
+            self._winner = "black"
+        elif any(1 not in board for board in self._boards):
+            self._winner = "white"
+        else:
+            self._winner = None
 
     def update_boards(self, move):
         player = self.get_player_number()
