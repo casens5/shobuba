@@ -1,8 +1,20 @@
 import numpy as np
 import re
 from dataclasses import dataclass
+from typing import List, Optional, Literal, Match
 
 from monte_carlo_ai import MonteCarloAI
+
+PlayerTurnType = Literal["black", "white"]
+PlayerNumberType = Literal[1, 2]
+MoveLengthType = Literal[1, 2]
+CoordinateType = Literal[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+BoardNumberType = Literal[0, 1, 2, 3]
+BoardLetterType = Literal["a", "b", "c", "d"]
+CardinalLetterType = Literal["n", "ne", "e", "se", "s", "sw", "w", "nw"]
+CardinalNumberType = Literal[0, 1, 2, 3, 4, 5, 6, 7]
+BoardsType = List[List[Optional[PlayerNumberType]]]
+
 
 LETTER_TO_INDEX = {"a": 0, "b": 1, "c": 2, "d": 3}
 INDEX_TO_LETTER = {v: k for k, v in LETTER_TO_INDEX.items()}
@@ -11,29 +23,29 @@ CARDINAL_TO_INDEX = {"n": 0, "ne": 1, "e": 2, "se": 3, "s": 4, "sw": 5, "w": 6, 
 INDEX_TO_CARDINAL = {v: k for k, v in CARDINAL_TO_INDEX.items()}
 
 
-def board_letter_to_index(letter: str) -> int:
-    return LETTER_TO_INDEX[letter.lower()]
+def board_letter_to_index(letter: BoardLetterType) -> BoardNumberType:
+    return LETTER_TO_INDEX[letter.lower()]  # type: ignore
 
 
-def index_to_board_letter(index: int) -> str:
-    return INDEX_TO_LETTER[index]
+def index_to_board_letter(index: BoardNumberType) -> BoardLetterType:
+    return INDEX_TO_LETTER[index]  # type: ignore
 
 
-def cardinal_to_index(cardinal: str) -> int:
-    return CARDINAL_TO_INDEX[cardinal.lower()]
+def cardinal_to_index(cardinal: CardinalLetterType) -> CardinalNumberType:
+    return CARDINAL_TO_INDEX[cardinal.lower()]  # type: ignore
 
 
-def index_to_cardinal(index: int) -> str:
-    return INDEX_TO_CARDINAL[index]
+def index_to_cardinal(index: CardinalNumberType) -> CardinalLetterType:
+    return INDEX_TO_CARDINAL[index]  # type: ignore
 
 
 @dataclass
 class BoardMove:
-    board: int
-    origin: int
-    destination: int = None
-    is_push: bool = None
-    push_destination: int = None
+    board: BoardNumberType
+    origin: CoordinateType
+    destination: CoordinateType
+    is_push: Optional[bool] = None
+    push_destination: Optional[CoordinateType] = None
 
     def __repr__(self) -> str:
         return (
@@ -66,8 +78,8 @@ class BoardMove:
 
 @dataclass
 class Direction:
-    cardinal: int
-    length: int
+    cardinal: CardinalNumberType
+    length: MoveLengthType
 
     def __repr__(self) -> str:
         return (
@@ -109,25 +121,25 @@ class GameError(Exception):
 
 class Game:
     ### initialization and UI functions
-    def __init__(self):
-        self._boards = []
+    def __init__(self) -> None:
+        self._boards: BoardsType = []
         self.initialize_boards()
-        self._player_turn = "black"
-        self._winner = None
+        self._player_turn: PlayerTurnType = "black"
+        self._winner: Optional[PlayerTurnType] = None
 
     @property
-    def boards(self):
+    def boards(self) -> BoardsType:
         return self._boards
 
     @property
-    def player_turn(self):
+    def player_turn(self) -> PlayerTurnType:
         return self._player_turn
 
     @property
-    def winner(self):
+    def winner(self) -> Optional[PlayerTurnType]:
         return self._winner
 
-    def initialize_boards(self):
+    def initialize_boards(self) -> None:
         self._boards = [
             [1, 1, 1, 1, None, None, None, None, None, None, None, None, 2, 2, 2, 2],
             [1, 1, 1, 1, None, None, None, None, None, None, None, None, 2, 2, 2, 2],
@@ -136,7 +148,7 @@ class Game:
         ]
 
     @staticmethod
-    def print_boards(boards):
+    def print_boards(boards) -> None:
         value_to_symbol = {
             None: ".",
             1: "X",
@@ -157,20 +169,20 @@ class Game:
                 )
             print()
 
-    def print_current_player(self):
+    def print_current_player(self) -> None:
         print(f"{self._player_turn}'s turn")
 
     ### game logic
-    def get_player_number(self):
+    def get_player_number(self) -> PlayerNumberType:
         return 1 if self._player_turn == "black" else 2
 
-    def change_turn(self):
+    def change_turn(self) -> None:
         if self._player_turn == "black":
             self._player_turn = "white"
         else:
             self._player_turn = "black"
 
-    def check_win(self):
+    def check_win(self) -> None:
         if any(2 not in board for board in self._boards):
             self._winner = "black"
         elif any(1 not in board for board in self._boards):
@@ -178,7 +190,7 @@ class Game:
         else:
             self._winner = None
 
-    def update_boards(self, move):
+    def update_boards(self, move: Move) -> None:
         player = self.get_player_number()
         self._boards[move.passive.board][move.passive.origin] = None
         self._boards[move.passive.board][move.passive.destination] = player
@@ -188,7 +200,7 @@ class Game:
         if move.active.is_push:
             opponent = 2 if player == 1 else 1
             if move.active.push_destination is not None:
-                self._boards[move.active.board][move.active.push_destination] = opponent
+                self._boards[move.active.board][move.active.push_destination] = opponent  # type: ignore
             if move.direction.length == 2:
                 midpoint = Rules.get_move_midpoint(
                     move.active.origin, move.active.destination
@@ -196,13 +208,13 @@ class Game:
                 self._boards[move.active.board][midpoint] = None
 
     ### gameplay execution
-    def play_move(self, move):
+    def play_move(self, move: Move) -> None:
         if Rules.is_move_push(move.active, move.direction.length, self._boards):
             move.active.is_push = True
             move.active.push_destination = Rules.get_move_destination(
                 move.active.origin,
                 move.direction.cardinal,
-                move.direction.length + 1,
+                move.direction.length + 1,  # type: ignore
             )
 
         if not Rules.is_move_legal(move, self._boards, self.get_player_number()):
@@ -219,20 +231,23 @@ class Game:
         return
 
     @staticmethod
-    def parse_move(input_match):
+    # input_match is WhoGivesADamnType
+    def parse_move(input_match) -> Move:
         groups = input_match.groups()
         move = Move(
             passive=BoardMove(
                 board=board_letter_to_index(groups[0]),
-                origin=int(groups[1]) - 1,
+                origin=int(groups[1]) - 1,  # type: ignore
+                destination=0,  # placeholder
             ),
             active=BoardMove(
                 board=board_letter_to_index(groups[4]),
-                origin=int(groups[5]) - 1,
+                origin=int(groups[5]) - 1,  # type: ignore
+                destination=0,  # placeholder
             ),
             direction=Direction(
                 cardinal=cardinal_to_index(groups[2]),
-                length=int(groups[3]),
+                length=int(groups[3]),  # type: ignore
             ),
         )
 
@@ -269,7 +284,7 @@ class Game:
 
         return move
 
-    def process_user_command(self, command):
+    def process_user_command(self, command: str) -> Literal[True, None]:
         move_pattern = r"""
             ^                         
             ([a-d])               
@@ -292,38 +307,38 @@ class Game:
         elif command == "read":
             self.print_boards(self._boards)
             self.print_current_player()
-            return
+            return None
         elif command == "restart":
             self.initialize_boards()
             self._winner = None
             self._player_turn = "black"
-            return
+            return None
         # move syntax match
         elif match:
             if self._winner is not None:
                 print("enter 'restart' to play a new game")
-                return
+                return None
 
             try:
                 move = self.parse_move(match)
             except GameError as e:
                 print(e)
-                return
+                return None
 
             self.play_move(move)
 
             self.print_boards(self._boards)
             self.print_current_player()
 
-            return
+            return None
         else:
             print(f"i don't understand input: {command}")
-            return
+            return None
 
 
 class Rules:
     @staticmethod
-    def is_move_legal(move, boards, player):
+    def is_move_legal(move: Move, boards: BoardsType, player: PlayerNumberType) -> bool:
         return Rules.is_passive_legal(
             move.passive, move.direction, boards, player
         ) and Rules.is_active_legal(
@@ -331,7 +346,12 @@ class Rules:
         )
 
     @staticmethod
-    def is_passive_legal(passive_move, direction, boards, player):
+    def is_passive_legal(
+        passive_move: BoardMove,
+        direction: Direction,
+        boards: BoardsType,
+        player: PlayerNumberType,
+    ) -> bool:
         if (player == 2 and passive_move.board < 2) or (
             player == 1 and passive_move.board > 1
         ):
@@ -365,7 +385,13 @@ class Rules:
         return True
 
     @staticmethod
-    def is_active_legal(active_move, passive_move, direction, boards, player):
+    def is_active_legal(
+        active_move: BoardMove,
+        passive_move: BoardMove,
+        direction: Direction,
+        boards: BoardsType,
+        player: PlayerNumberType,
+    ) -> bool:
         if passive_move.board == active_move.board:
             print("active and passive moves must be on different boards")
             return False
@@ -392,17 +418,19 @@ class Rules:
             return False
 
         if active_move.is_push:
-            stones = bool(boards[active_move.board][active_move.destination])
+            stones = int(bool(boards[active_move.board][active_move.destination]))
 
             midpoint = None
             if direction.length == 2:
                 midpoint = Rules.get_move_midpoint(
                     active_move.origin, active_move.destination
                 )
-                stones += bool(boards[active_move.board][midpoint])
+                stones += int(bool(boards[active_move.board][midpoint]))
 
             if active_move.push_destination is not None:
-                stones += bool(boards[active_move.board][active_move.push_destination])
+                stones += int(
+                    bool(boards[active_move.board][active_move.push_destination])
+                )
 
             if stones > 1:
                 print("you can't push 2 stones in a row")
@@ -417,7 +445,9 @@ class Rules:
         return True
 
     @staticmethod
-    def is_move_push(move, length, boards):
+    def is_move_push(
+        move: BoardMove, length: MoveLengthType, boards: BoardsType
+    ) -> bool:
         if length == 2:
             midpoint = Rules.get_move_midpoint(move.origin, move.destination)
             if boards[move.board][midpoint] is not None:
@@ -428,11 +458,15 @@ class Rules:
         return False
 
     @staticmethod
-    def get_move_midpoint(origin, destination):
-        return origin + ((destination - origin) // 2)
+    def get_move_midpoint(
+        origin: CoordinateType, destination: CoordinateType
+    ) -> CoordinateType:
+        return origin + ((destination - origin) // 2)  # type: ignore
 
     @staticmethod
-    def get_move_destination(origin, direction, length):
+    def get_move_destination(
+        origin: CoordinateType, direction: CoordinateType, length: Literal[1, 2, 3]
+    ) -> CoordinateType:
         x = origin % 4
         y = origin // 4
 
@@ -450,7 +484,7 @@ class Rules:
             # out of bounds
             return
         else:
-            return (y * 4) + x
+            return (y * 4) + x  # type: ignore
 
 
 if __name__ == "__main__":
