@@ -46,6 +46,23 @@ class BoardMove:
             ")"
         )
 
+    def __post_init__(self):
+        if not (0 <= self.board <= 3):
+            raise ValueError(f"board must be between 0 and 3, got {self.board}")
+
+        if not (0 <= self.origin <= 15):
+            raise ValueError(f"origin must be between 0 and 15, got {self.origin}")
+
+        if not (0 <= self.destination <= 15):
+            raise ValueError(
+                f"destination must be between 0 and 15, got {self.destination}"
+            )
+
+        if not (0 <= self.push_destination <= 15):
+            raise ValueError(
+                f"push_destination must be between 0 and 15, got {self.push_destination}"
+            )
+
 
 @dataclass
 class Direction:
@@ -59,6 +76,13 @@ class Direction:
             f"  length=   {repr(self.length)},\n"
             ")"
         )
+
+    def __post_init__(self):
+        if not (0 <= self.cardinal <= 7):
+            raise ValueError(f"cardinal must be between 0 and 7, got {self.cardinal}")
+
+        if not (1 <= self.push_destination <= 2):
+            raise ValueError(f"length must be 1 or 2, got {self.length}")
 
 
 @dataclass
